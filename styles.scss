@@ -1,0 +1,34 @@
+.chess-board{
+
+    display: flex;
+    justify-content: center;
+   
+    
+
+
+
+
+.chess-board__tile{
+    height:5rem;
+    width:5rem;
+    border: 1px solid black; 
+
+
+    .pointer{
+
+        display:none;
+    }
+
+   
+
+} 
+.black{
+        background-color:#b58763;
+      
+    
+    }
+    .white{
+        background-color: #f0dab5;
+       
+    }
+}
