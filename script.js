@@ -51,7 +51,7 @@ const chessBoard = {
     whiteRook,
     "",
     "",
-    blackKnight,
+    blackRook,
     blackKnight,
     blackKing,
   ],
@@ -63,22 +63,33 @@ const chessBoard = {
 }
 */
 
-const refactorBoard = () => {
-  console.log(chessBoard);
-};
-
 const makeMove = (event) => {
   //press on brown color not the pointer
   let toPosition = Number(event.target.getAttribute("value"));
 
   if (legalMoves.includes(toPosition)) {
-    chessBoard.board[toPosition] = chessBoard.board[fromPosition];
-    chessBoard.board[fromPosition] = "";
+    updateBoardArray(fromPosition, toPosition);
+    updateIcons(fromPosition, toPosition);
   }
-  if (colorTurn == "black") colorTurn = "white";
-  else colorTurn = "black";
+  changeTurn();
+};
+
+const updateBoardArray = (fromPosition, toPosition) => {
+  chessBoard.board[toPosition] = chessBoard.board[fromPosition];
+  chessBoard.board[fromPosition] = "";
+};
+
+const updateIcons = (fromPosition, toPosition) => {
+  tiles[toPosition].querySelector(".chess-icon").src =
+    tiles[fromPosition].querySelector(".chess-icon").src;
+
+  tiles[fromPosition].querySelector(".chess-icon").src = "";
+};
+
+const changeTurn = () => {
+  colorTurn == "black" ? (colorTurn = "white") : (colorTurn = "black");
   legalMovesDisplayed = false;
-  refactorBoard();
+  console.log(chessBoard);
 };
 
 const showLegalMoves = (event) => {
@@ -95,14 +106,12 @@ const showLegalMoves = (event) => {
 
   //CHECK IF ROOK
   if (chessBoard.board[tilePressed].move == -1) {
-    console.log("inside1");
     //check forward
     for (let i = 1; i < 9; i++) {
       if (chessBoard.board[tilePressed + i] == "") {
         pointers[tilePressed + i].style.display = "block";
 
         legalMoves.push(tilePressed + i);
-        console.log("inside2");
 
         continue;
       }
@@ -110,7 +119,6 @@ const showLegalMoves = (event) => {
       if (chessBoard.board[tilePressed + i].color != colorTurn) {
         pointers[tilePressed + i].style.display = "block";
         legalMoves.push(tilePressed + i);
-        console.log("inside3");
       }
       legalMovesDisplayed = true;
 
@@ -143,8 +151,6 @@ const showLegalMoves = (event) => {
 
   //ATTACK BACKWARDS
   //if can go back enough
-  console.log(tilePressed);
-  console.log(tileAttacked);
 
   if (tilePressed - tileAttacked > -1) {
     if (
@@ -161,9 +167,6 @@ const showLegalMoves = (event) => {
 
   //ATTACK FORWARD
   //if can go back enough
-
-  console.log(tilePressed);
-  console.log(tileAttacked);
 
   if (tilePressed + tileAttacked < 8) {
     if (

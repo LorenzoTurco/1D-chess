@@ -9,10 +9,12 @@
 }
 .chess-board .chess-board__tile .pointer {
   display: none;
+  height: 1rem;
+  width: 1rem;
 }
 .chess-board .black {
   background-color: #b58763;
 }
 .chess-board .white {
   background-color: #f0dab5;
-}/*# sourceMappingURL=styles.css.map */
+}
