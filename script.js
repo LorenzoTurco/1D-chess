@@ -1,8 +1,12 @@
 const tiles = document.querySelectorAll(".chess-board__tile");
-console.log(tiles);
+
+const pointers = document.querySelectorAll(".pointer");
 
 // GLOBAL VARIABLES
 let gameFinished = false;
+let legalMovesDisplayed = false;
+let legalMoves = [];
+let fromPosition = "";
 
 //Who's turn
 let colorTurn = "white";
@@ -36,7 +40,7 @@ const whiteRook = {
   move: -1,
 };
 const blackRook = {
-  color: "Black",
+  color: "black",
   move: -1,
 };
 
@@ -45,9 +49,9 @@ const chessBoard = {
     whiteKing,
     whiteKnight,
     whiteRook,
-    null,
-    null,
-    blackRook,
+    "",
+    "",
+    blackKnight,
     blackKnight,
     blackKing,
   ],
@@ -59,74 +63,126 @@ const chessBoard = {
 }
 */
 
+const refactorBoard = () => {
+  console.log(chessBoard);
+};
+
+const makeMove = (event) => {
+  //press on brown color not the pointer
+  let toPosition = Number(event.target.getAttribute("value"));
+
+  if (legalMoves.includes(toPosition)) {
+    chessBoard.board[toPosition] = chessBoard.board[fromPosition];
+    chessBoard.board[fromPosition] = "";
+  }
+  if (colorTurn == "black") colorTurn = "white";
+  else colorTurn = "black";
+  legalMovesDisplayed = false;
+  refactorBoard();
+};
+
 const showLegalMoves = (event) => {
-  const tilePressed = event.target.getAttribute("value");
-  const tileAttacked = chessBoard.board[tilePressed].move;
+  removePointers();
+  if (legalMovesDisplayed) {
+    makeMove(event);
+    return;
+  }
+
+  const tilePressed = Number(event.target.getAttribute("value"));
+  const tileAttacked = Number(chessBoard.board[tilePressed].move);
 
   if (chessBoard.board[tilePressed].color != colorTurn) return;
 
   //CHECK IF ROOK
   if (chessBoard.board[tilePressed].move == -1) {
+    console.log("inside1");
     //check forward
     for (let i = 1; i < 9; i++) {
-      if (chessBoard.board[Number(tilePressed) + i] == null) {
-        tiles[Number(tilePressed) + i].querySelector(".pointer").style.display =
-          "block";
-        //Add pointer
+      if (chessBoard.board[tilePressed + i] == "") {
+        pointers[tilePressed + i].style.display = "block";
+
+        legalMoves.push(tilePressed + i);
+        console.log("inside2");
+
         continue;
       }
 
-      if (chessBoard.board[Number(tilePressed) + i].color != colorTurn) {
-        //add pointer
-        tiles[Number(tilePressed) + i].querySelector(".pointer").style.display =
-          "block";
-        break;
+      if (chessBoard.board[tilePressed + i].color != colorTurn) {
+        pointers[tilePressed + i].style.display = "block";
+        legalMoves.push(tilePressed + i);
+        console.log("inside3");
       }
+      legalMovesDisplayed = true;
+
+      break;
     }
 
     //check backwards
     for (let i = 1; i < 9; i++) {
-      if (chessBoard.board[Number(tilePressed) - i] == null) {
-        //Add pointer
+      if (chessBoard.board[tilePressed - i] == "") {
+        pointers[tilePressed - i].style.display = "block";
+        legalMoves.push(tilePressed - i);
+
         continue;
       }
 
-      if (chessBoard.board[Number(tilePressed) - i].color != colorTurn) {
-        //add pointer
-        break;
+      if (chessBoard.board[tilePressed - i].color != colorTurn) {
+        pointers[tilePressed - i].style.display = "block";
+        legalMoves.push(tilePressed - i);
       }
+      legalMovesDisplayed = true;
+
+      break;
     }
 
+    fromPosition = tilePressed;
     return;
   }
 
   //KING, KNIGHT
 
   //ATTACK BACKWARDS
-  if (tilePressed - tileAttacked > 1) {
-    //if can go back enough
+  //if can go back enough
+  console.log(tilePressed);
+  console.log(tileAttacked);
+
+  if (tilePressed - tileAttacked > -1) {
     if (
-      chessBoard.board[Number(tilePressed) - Number(tileAttacked)].color !=
-      colorTurn
+      chessBoard.board[tilePressed - tileAttacked] == "" ||
+      chessBoard.board[tilePressed - tileAttacked].color != colorTurn
     ) {
-      //if the piece you can attack is not your own
-      //show legal moves
-      //console.log(tiles[tilePressed - tileAttacked]);
+      pointers[tilePressed - tileAttacked].style.display = "block";
+      legalMovesDisplayed = true;
+
+      legalMoves.push(tilePressed - tileAttacked);
+      fromPosition = tilePressed;
     }
   }
 
   //ATTACK FORWARD
-  if (tilePressed + tileAttacked < 8) {
-    //if can go back enough
+  //if can go back enough
 
+  console.log(tilePressed);
+  console.log(tileAttacked);
+
+  if (tilePressed + tileAttacked < 8) {
     if (
-      chessBoard.board[Number(tilePressed) + Number(tileAttacked)].color !=
-      colorTurn
+      chessBoard.board[tilePressed + tileAttacked] == "" ||
+      chessBoard.board[tilePressed + tileAttacked].color != colorTurn
     ) {
-      //if the piece you can attack is not your own
-      //show legal moves
+      pointers[tilePressed + tileAttacked].style.display = "block";
+      legalMovesDisplayed = true;
+      legalMoves.push(tilePressed + tileAttacked);
+      fromPosition = tilePressed;
     }
   }
+  return;
+};
+
+const removePointers = () => {
+  Array.from(pointers).forEach((pointer) => {
+    pointer.style.display = "none";
+  });
 };
 
 Array.from(tiles).forEach((tile) => {
