@@ -95,11 +95,18 @@ const changeTurn = () => {
   legalMoves = [];
 };
 
+const CheckMate = () => {
+  console.log("CHECKMATE!!!");
+};
+
 const checkIfCheckMate = () => {
+  //if you can eat the piece -> NOT checkmate
   //if nothing left or right -> checkmate
-  //if only ally pieces next to you -> checkmate
-  /*
-  const kingPosition = 0;
+  //if only ally pieces next to you (stuck) -> checkmate
+
+  console.log(tilesInCheck);
+
+  let kingPosition = 0;
 
   for (let i = 0; i < chessBoard.board.length; i++) {
     //find king position
@@ -111,9 +118,28 @@ const checkIfCheckMate = () => {
       kingPosition = i;
       break;
     }
-  }*/
+  }
 
-  console.log(tilesInCheck);
+  if (tilesInCheck.includes(kingPosition + 1, kingPosition - 1)) {
+    CheckMate();
+    return;
+  }
+
+  if (chessBoard.board[kingPosition + 1] == undefined) {
+    if (tilesInCheck.includes(kingPosition - 1)) {
+      CheckMate();
+      return;
+    }
+  }
+
+  if (chessBoard.board[kingPosition - 1] == undefined) {
+    if (tilesInCheck.includes(kingPosition + 1)) {
+      CheckMate();
+      return;
+    }
+  }
+  console.log("THERE MIGHT BE STILL A CHANCE");
+  return;
 };
 
 const makeMove = (event) => {
@@ -128,9 +154,6 @@ const makeMove = (event) => {
 
     if (isChecked()) {
       checkIfCheckMate();
-    }
-
-    {
     }
   } else {
     console.log("move not allowed");
@@ -195,10 +218,12 @@ const isChecked = () => {
             console.log("CHECK");
 
             for (let k = 1; k <= j; k++) {
+              if (i - k == i) continue;
+
               tilesInCheck.push(i - k);
             }
 
-            //get checked tiles behind the king
+            //get checked tiles behind the king/*
             if (chessBoard.board[kingPosition - 1] == "") {
               for (let k = kingPosition; k > -1; k--) {
                 if (chessBoard.board[kingPosition - k] == "") {
@@ -220,10 +245,14 @@ const isChecked = () => {
           if (j + 1 == kingPosition) {
             //is in check
 
+            chessBoard.board[j];
             for (let x = 1; x <= j; x++) {
+              if (x + 1 == i) continue;
+
               tilesInCheck.push(x + 1);
             }
             //get checked tiles behind the king
+
             if (chessBoard.board[kingPosition + 1] == "") {
               console.log("inside");
               for (let k = 1; k < 8; k++) {
