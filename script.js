@@ -11,6 +11,7 @@ let isInCheck = false;
 let tilesInCheck = [];
 let checkerPiecePosition = "";
 let inCheckLegalMoves = [];
+let tempChessBoard;
 
 //Who's turn
 let colorTurn = "white";
@@ -97,7 +98,8 @@ const changeTurn = () => {
 };
 
 const CheckMate = () => {
-  console.log("CHECKMATE!!!");
+  editResultLabel("CHECKMATE");
+  gameFinished = true;
 };
 
 const checkIfCheckMate = () => {
@@ -443,6 +445,26 @@ const isChecked = () => {
   return isInCheck;
 };
 
+const editResultLabel = (result) => {
+  const resultLabel = document.querySelector(".result");
+
+  resultLabel.innerText = result;
+};
+
+const checkForStalemate = () => {
+  if (
+    chessBoard.board[7].name == "king" &&
+    chessBoard.board[6].name == "knight" &&
+    chessBoard.board[5].name == "rook" &&
+    chessBoard.board[5].color == "white"
+  ) {
+    editResultLabel("STALEMATE");
+    gameFinished = true;
+    return true;
+  }
+  return false;
+};
+
 const makeMove = (event) => {
   //press on brown color not the pointer
   let toPosition = Number(event.target.getAttribute("value"));
@@ -455,6 +477,8 @@ const makeMove = (event) => {
 
     changeTurn();
 
+    if (checkForStalemate()) return;
+
     if (isChecked()) {
       console.log("in");
       checkIfCheckMate();
@@ -466,6 +490,42 @@ const makeMove = (event) => {
     legalMovesDisplayed = false;
   }
   return;
+};
+
+const checkIfStalemate = (tilePressed) => {
+  // check if move would put king under check by recalculating checked tiles
+  // and seeing if there is any difference
+
+  if (
+    tempChessBoard[0].name == "king" &&
+    tempChessBoard[1].name == "knight" &&
+    tempChessBoard[2].name == "rock" &&
+    tempChessBoard[2].color == "black"
+  ) {
+    console.log("cant do taht move because it puts you in check");
+    return false;
+  }
+
+  if (
+    tempChessBoard[7].name == "king" &&
+    tempChessBoard[6].name == "knight" &&
+    tempChessBoard[5].name == "rock" &&
+    tempChessBoard[5].color == "white"
+  ) {
+    console.log("cant do taht move because it puts you in check");
+    return false;
+  }
+
+  /*if (isChecked()) {
+
+    console.log("cant do taht move because it puts you in check");
+
+    chessBoard.board = tempChessBoard;
+
+    return false;
+  }*/
+
+  return true;
 };
 
 const showLegalMoves = (event) => {
