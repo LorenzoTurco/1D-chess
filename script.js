@@ -9,6 +9,8 @@ let legalMoves = [];
 let fromPosition = "";
 let isInCheck = false;
 let tilesInCheck = [];
+let checkerPiecePosition = "";
+let inCheckLegalMoves = [];
 
 //Who's turn
 let colorTurn = "white";
@@ -103,6 +105,8 @@ const checkIfCheckMate = () => {
   //if nothing left or right -> checkmate
   //if only ally pieces next to you (stuck) -> checkmate
 
+  console.log(tilesInCheck);
+  inCheckLegalMoves = [];
   let kingPosition = 0;
 
   for (let i = 0; i < chessBoard.board.length; i++) {
@@ -117,37 +121,198 @@ const checkIfCheckMate = () => {
     }
   }
 
+  //CHECK IF KING CAN ESCAPE CHECK
+
+  if (!tilesInCheck.includes(kingPosition + 1)) {
+    if (chessBoard.board[kingPosition + 1] != undefined) {
+      if (chessBoard.board[kingPosition + 1] == "") {
+        inCheckLegalMoves.push(["king", kingPosition + 1]);
+        console.log("king move away from check");
+      }
+    }
+  }
+  if (!tilesInCheck.includes(kingPosition - 1)) {
+    if (chessBoard.board[kingPosition - 1] != undefined) {
+      if (chessBoard.board[kingPosition - 1] == "") {
+        inCheckLegalMoves.push(["king", kingPosition - 1]);
+        console.log("king move away from check");
+      }
+    }
+  }
   console.log(tilesInCheck);
 
-  console.log(kingPosition);
-  console.log(kingPosition + 1);
-  console.log(kingPosition - 1);
+  //CHECK IF YOU CAN USE A KNIGHT TO BLOCK or EAT THE CHECK
 
-  if (
-    tilesInCheck.includes(kingPosition - 1) &&
-    tilesInCheck.includes(kingPosition + 1)
-  ) {
-    console.log("inside");
-    CheckMate();
-    tilesInCheck = [];
-    return;
-  }
+  //knight can't block other knights
 
-  if (chessBoard.board[kingPosition + 1] == undefined) {
-    if (tilesInCheck.includes(kingPosition - 1)) {
-      CheckMate();
-      tilesInCheck = [];
+  let knightPosition = undefined; //CHANGE TO SOMETHING THAT ISNT A NUMBER E.G. NAN/undefined
 
-      return;
+  for (let i = 0; i < chessBoard.board.length; i++) {
+    //find knight position
+
+    if (
+      chessBoard.board[i].name == "knight" &&
+      chessBoard.board[i].color == colorTurn
+    ) {
+      knightPosition = i;
+      break;
     }
   }
 
-  if (chessBoard.board[kingPosition - 1] == undefined) {
-    if (tilesInCheck.includes(kingPosition + 1)) {
-      CheckMate();
-      tilesInCheck = [];
+  let x;
+  let y;
+  if (knightPosition != undefined) {
+    //check if knight can cover one of the checked tiles
 
-      return;
+    x = knightPosition + chessBoard.board[knightPosition].move;
+    y = knightPosition - chessBoard.board[knightPosition].move;
+
+    console.log(x);
+    console.log(y);
+    console.log(tilesInCheck.includes(x));
+    console.log(tilesInCheck.includes(y));
+
+    //check if knight can eat piece
+
+    if (x == checkerPiecePosition) {
+      console.log(
+        "there is still a legal move to eat the piece putting you in check"
+      );
+
+      inCheckLegalMoves.push(["knight", x]);
+    }
+
+    if (y == checkerPiecePosition) {
+      console.log(
+        "there is still a legal move to eat the piece putting you in check"
+      );
+
+      inCheckLegalMoves.push(["knight", y]);
+    }
+  }
+
+  if (chessBoard.board[checkerPiecePosition].name == "rook") {
+    //check if knight can block check
+    //ignore if knight can block the kingPosition
+    if (x == kingPosition || y == kingPosition) {
+    } else if (tilesInCheck.includes(x)) {
+      console.log(
+        "there is still a legal move for the knight to stop the check"
+      );
+      inCheckLegalMoves.push(["knight", x]);
+    } else if (tilesInCheck.includes(y)) {
+      console.log(
+        "there is still a legal move for the knight to stop the check"
+      );
+      inCheckLegalMoves.push(["knight", y]);
+    }
+  }
+
+  //////////////////////////////////////////
+
+  //check if your rook can eat enemy checker piece
+
+  //find rook
+
+  let rookPosition = undefined;
+
+  for (let i = 0; i < chessBoard.board.length; i++) {
+    //find knight position
+
+    if (
+      chessBoard.board[i].name == "rook" &&
+      chessBoard.board[i].color == colorTurn
+    ) {
+      rookPosition = i;
+      break;
+    }
+  }
+
+  if (rookPosition != undefined) {
+    if (chessBoard.board[checkerPiecePosition].name == "knight") {
+      //check if your rook can eat enemy checker piece
+
+      //check what tiles the rook can attack and if it incldues the checkerPieceTile
+
+      //check right
+      for (let i = rookPosition; i < 7; i++) {
+        if (chessBoard.board[i + 1] == undefined) break;
+        if (chessBoard.board[i + 1].name == "") continue;
+
+        if (i == checkerPiecePosition) {
+          inCheckLegalMoves.push(["rook", i]);
+          console.log(
+            "there is still a legal move for the rook to eat the check"
+          );
+          break;
+        }
+      }
+
+      for (let i = rookPosition; i > -1; i--) {
+        if (chessBoard.board[i - 1] == undefined) break;
+        if (chessBoard.board[i - 1].name == "") continue;
+
+        if (i == checkerPiecePosition) {
+          inCheckLegalMoves.push(["rook", i]);
+          console.log(
+            "there is still a legal move for the rook to eat the check"
+          );
+          break;
+        }
+      }
+    }
+  }
+
+  //////////////////////////////////////////////
+
+  //check if rook can eat the piece giving the check
+  //check if there is a rock behind piece giving the check
+  if (checkerPiecePosition > kingPosition) {
+    //right attack left
+
+    for (let i = checkerPiecePosition; i < 7; i++) {
+      if (chessBoard.board[i + 1] == undefined) break; //end of board -> CHECKAMTE
+
+      if (chessBoard.board[i + 1].name == "") continue;
+
+      if (
+        chessBoard.board[i + 1].name == "rook" &&
+        chessBoard.board[i + 1].color == colorTurn
+      ) {
+        inCheckLegalMoves.push(["rook", i]);
+        console.log(
+          "there is still a legal move for the rook to eat the check"
+        );
+        tilesInCheck = [];
+        return;
+      } //I think it needs a break on this line
+    }
+    if (inCheckLegalMoves.length == 0) {
+      CheckMate();
+    }
+  } else if (checkerPiecePosition < kingPosition) {
+    //left attack right
+
+    console.log("inside");
+    for (let i = checkerPiecePosition; i > -1; i--) {
+      if (chessBoard.board[i - 1] == undefined) break;
+
+      if (chessBoard.board[i - 1].name == "") continue;
+
+      if (
+        chessBoard.board[i - 1].name == "rook" &&
+        chessBoard.board[i + 1].color == colorTurn
+      ) {
+        inCheckLegalMoves.push(["rook", i]);
+        console.log(
+          "there is still a legal move for the rook to eat the check"
+        );
+        tilesInCheck = [];
+        return;
+      }
+    }
+    if (inCheckLegalMoves.length == 0) {
+      CheckMate();
     }
   }
   console.log("THERE MIGHT BE STILL A CHANCE");
@@ -156,32 +321,11 @@ const checkIfCheckMate = () => {
   return;
 };
 
-const makeMove = (event) => {
-  //press on brown color not the pointer
-  let toPosition = Number(event.target.getAttribute("value"));
-
-  if (legalMoves.includes(toPosition)) {
-    updateBoardArray(fromPosition, toPosition);
-    updateIcons(fromPosition, toPosition);
-
-    changeTurn();
-
-    if (isChecked()) {
-      checkIfCheckMate();
-    }
-  } else {
-    console.log("move not allowed");
-    removePointers();
-    legalMoves = [];
-    legalMovesDisplayed = false;
-  }
-  return;
-};
-
 const isChecked = () => {
   //CHECK IF YOUR KING IS IN CHECK
   //Find your king
   let kingPosition = 0;
+  isInCheck = false;
 
   for (let i = 0; i < chessBoard.board.length; i++) {
     //find king position
@@ -214,6 +358,7 @@ const isChecked = () => {
           tilesInCheck.push(i + chessBoard.board[i].move);
           tilesInCheck.push(i - chessBoard.board[i].move);
           console.log("CHECK");
+          checkerPiecePosition = i;
 
           break;
         }
@@ -230,14 +375,16 @@ const isChecked = () => {
           if (i - j == kingPosition) {
             //is in check
             console.log("CHECK");
+            checkerPiecePosition = i;
 
+            tilesInCheck = [];
             for (let k = 1; k <= j; k++) {
               if (i - k == i) continue;
-
               tilesInCheck.push(i - k);
             }
+            console.log(tilesInCheck);
 
-            //get checked tiles behind the king/*
+            //get checked tiles behind the king
             if (chessBoard.board[kingPosition - 1] == "") {
               for (let k = kingPosition; k > -1; k--) {
                 if (chessBoard.board[kingPosition - k] == "") {
@@ -260,11 +407,14 @@ const isChecked = () => {
             //is in check
 
             chessBoard.board[j];
+            tilesInCheck = [];
             for (let x = 1; x <= j; x++) {
-              if (x + 1 == i) continue;
+              if (x + 1 == i) continue; //piece checking shouldn't be in tilesChecked
 
               tilesInCheck.push(x + 1);
             }
+            console.log(tilesInCheck);
+
             //get checked tiles behind the king
 
             for (let k = 1; k < 8; k++) {
@@ -279,6 +429,7 @@ const isChecked = () => {
               }
             }
             console.log("CHECK");
+            checkerPiecePosition = i;
             isInCheck = true;
           }
           break;
@@ -292,18 +443,91 @@ const isChecked = () => {
   return isInCheck;
 };
 
-const showLegalMoves = (event) => {
-  removePointers();
+const makeMove = (event) => {
+  //press on brown color not the pointer
+  let toPosition = Number(event.target.getAttribute("value"));
 
-  if (legalMovesDisplayed) {
-    makeMove(event);
+  console.log(toPosition);
+  console.log(legalMoves);
+  if (legalMoves.includes(toPosition)) {
+    updateBoardArray(fromPosition, toPosition);
+    updateIcons(fromPosition, toPosition);
+
+    changeTurn();
+
+    if (isChecked()) {
+      console.log("in");
+      checkIfCheckMate();
+    }
+  } else {
+    console.log("move not allowed");
+    removePointers();
+    legalMoves = [];
+    legalMovesDisplayed = false;
+  }
+  return;
+};
+
+const showLegalMoves = (event) => {
+  if (gameFinished) {
+    console.log("GAME FINISHED");
     return;
   }
 
   const tilePressed = Number(event.target.getAttribute("value"));
   const tileAttacked = Number(chessBoard.board[tilePressed].move);
 
+  removePointers();
+
+  if (legalMovesDisplayed) {
+    console.log("inside this");
+    makeMove(event);
+    return;
+  }
+
+  if (isChecked()) {
+    //only allow moves to stop check
+
+    //removePointers();
+    console.log("inside");
+    console.log(inCheckLegalMoves);
+    //Knight moves
+    if (chessBoard.board[tilePressed].name == "knight") {
+      for (let i = 0; i < inCheckLegalMoves.length; i++) {
+        if (inCheckLegalMoves[i][0] == "knight") {
+          pointers[inCheckLegalMoves[i][1]].style.display = "block";
+          legalMoves.push(inCheckLegalMoves[i][1]);
+        }
+      }
+    }
+    //rook moves
+    if (chessBoard.board[tilePressed].name == "rook") {
+      for (let i = 0; i < inCheckLegalMoves.length; i++) {
+        if (inCheckLegalMoves[i][0] == "rook") {
+          pointers[inCheckLegalMoves[i][1]].style.display = "block";
+          legalMoves.push(inCheckLegalMoves[i][1]);
+        }
+      }
+    }
+
+    //king moves
+    if (chessBoard.board[tilePressed].name == "king") {
+      for (let i = 0; i < inCheckLegalMoves.length; i++) {
+        if (inCheckLegalMoves[i][0] == "king") {
+          console.log("moving king");
+          pointers[inCheckLegalMoves[i][1]].style.display = "block";
+          legalMoves.push(inCheckLegalMoves[i][1]);
+        }
+      }
+    }
+    legalMovesDisplayed = true;
+    fromPosition = tilePressed;
+    return;
+  }
+
   if (chessBoard.board[tilePressed].color != colorTurn) return;
+
+  //check if in check
 
   //CHECK IF ROOK
   if (chessBoard.board[tilePressed].move == -1) {
