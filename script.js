@@ -125,7 +125,7 @@ const checkIfCheckMate = () => {
 
   if (!tilesInCheck.includes(kingPosition + 1)) {
     if (chessBoard.board[kingPosition + 1] != undefined) {
-      if (chessBoard.board[kingPosition + 1] == "") {
+      if (chessBoard.board[kingPosition + 1].color != colorTurn) {
         inCheckLegalMoves.push(["king", kingPosition + 1]);
         console.log("king move away from check");
       }
@@ -133,7 +133,7 @@ const checkIfCheckMate = () => {
   }
   if (!tilesInCheck.includes(kingPosition - 1)) {
     if (chessBoard.board[kingPosition - 1] != undefined) {
-      if (chessBoard.board[kingPosition - 1] == "") {
+      if (chessBoard.board[kingPosition - 1].color != colorTurn) {
         inCheckLegalMoves.push(["king", kingPosition - 1]);
         console.log("king move away from check");
       }
