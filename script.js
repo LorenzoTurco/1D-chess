@@ -85,7 +85,6 @@ const updateBoardArray = (fromPosition, toPosition) => {
 const updateIcons = (fromPosition, toPosition) => {
   tiles[toPosition].querySelector(".chess-icon").src =
     tiles[fromPosition].querySelector(".chess-icon").src;
-
   tiles[fromPosition].querySelector(".chess-icon").src = "";
 };
 
@@ -104,8 +103,6 @@ const checkIfCheckMate = () => {
   //if nothing left or right -> checkmate
   //if only ally pieces next to you (stuck) -> checkmate
 
-  console.log(tilesInCheck);
-
   let kingPosition = 0;
 
   for (let i = 0; i < chessBoard.board.length; i++) {
@@ -120,14 +117,27 @@ const checkIfCheckMate = () => {
     }
   }
 
-  if (tilesInCheck.includes(kingPosition + 1, kingPosition - 1)) {
+  console.log(tilesInCheck);
+
+  console.log(kingPosition);
+  console.log(kingPosition + 1);
+  console.log(kingPosition - 1);
+
+  if (
+    tilesInCheck.includes(kingPosition - 1) &&
+    tilesInCheck.includes(kingPosition + 1)
+  ) {
+    console.log("inside");
     CheckMate();
+    tilesInCheck = [];
     return;
   }
 
   if (chessBoard.board[kingPosition + 1] == undefined) {
     if (tilesInCheck.includes(kingPosition - 1)) {
       CheckMate();
+      tilesInCheck = [];
+
       return;
     }
   }
@@ -135,10 +145,14 @@ const checkIfCheckMate = () => {
   if (chessBoard.board[kingPosition - 1] == undefined) {
     if (tilesInCheck.includes(kingPosition + 1)) {
       CheckMate();
+      tilesInCheck = [];
+
       return;
     }
   }
   console.log("THERE MIGHT BE STILL A CHANCE");
+  tilesInCheck = [];
+
   return;
 };
 
@@ -253,12 +267,15 @@ const isChecked = () => {
             }
             //get checked tiles behind the king
 
-            if (chessBoard.board[kingPosition + 1] == "") {
-              console.log("inside");
-              for (let k = 1; k < 8; k++) {
-                if (chessBoard.board[kingPosition + k] == "") {
-                  tilesInCheck.push(kingPosition + k);
-                }
+            for (let k = 1; k < 8; k++) {
+              console.log(chessBoard.board[kingPosition + k]);
+              if (chessBoard.board[kingPosition + k] != undefined) {
+                tilesInCheck.push(kingPosition + k);
+                break;
+              }
+
+              if (chessBoard.board[kingPosition + k] == "") {
+                tilesInCheck.push(kingPosition + k);
               }
             }
             console.log("CHECK");
