@@ -68,12 +68,7 @@ const chessBoard = {
   ],
 };
 
-/*while (!gameFinished) {
-  if (whiteTurn) {
-  }
-}
-*/
-
+//FUNCTIONS
 const removePointers = () => {
   Array.from(pointers).forEach((pointer) => {
     pointer.style.display = "none";
